@@ -1,6 +1,8 @@
 from moviepy.editor import *
 from numpy import *
 
+import subprocess 
+
 SCREENSIZE = (1280, 720)
 HOURS = 1
 MIN_PER_HOUR = 60
@@ -16,6 +18,20 @@ minute = 0
 second = 0
 
 #clip_queue = []
+
+
+def find_font_file(font_name): 
+    shell_call_args = ["convert", "-list", "font"] 
+    shell_call = subprocess.Popen(shell_call_args, stdout = subprocess.PIPE) 
+    font_list, shell_err = shell_call.communicate() 
+    
+    fname_exp = r"^Font: " + font_name + r"$" 
+    fpath_exp = r"\bglyphs: (.*)$" 
+    
+    fname_match = re.search(fname_exp) 
+    fpath_match = re.search(fpath_exp, fname_match.start) 
+    
+    return fpath_match.group(1) 
 
 ttl_time = ((hour * 60) + minute) * 60 + second
 

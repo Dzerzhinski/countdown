@@ -76,26 +76,6 @@ def svg_header(font, width, height):
     svg_head += 'height="{}pt" '.format(str(height))
     svg_head += 'xmlns="http://www.w3.org/2000/svg">\n\n' 
     
-    # Old attempt
-#    svg_head += 2 * " " +  "<defs>\n" + \
-#                4 * " " + "<style type=\"text/css\">\n" + \
-#                6 * " " + "<![CDATA[\n" + \
-#                8 * " " + "@font-face {\n" 
-#    svg_head += 10 * " " + "font-family: '{}';\n".format(font.name) 
-#    svg_head += 10 * " " + "src: url('{}');\n".format(font.fpath) 
-#    if (font.tnum): 
-#        svg_head += 10 * " " + "font-variant-numeric: tabular_nums;\n" 
-#    svg_head += 8 * " " + "}\n\n" 
-#    
-#    svg_head += 8 * " " + "text {\n" 
-#    svg_head += 10 * " " + "font-size: {}pt;\n".format(font.pt_size) 
-#    svg_head += 10 * " " + "text-anchor: end;\n" 
-#    svg_head += 8 * " " + "}\n" 
-#    svg_head += 6 * " " + "]]>\n" 
-#    
-#    svg_head += 4 * " " + "</style>\n" 
-#    svg_head += 2 * " " + "</defs>\n\n" 
-
     svg_head += 2 * " " + "<style>\n"
     
     svg_head += 4 * " " + "text {\n" + \
@@ -198,9 +178,6 @@ def svg_to_png(filename):
     shell_call = subprocess.run(shell_call_args, \
                     timeout = 10, \
                     shell = False) 
-    #print(shell_call.stdout) 
-#    print("Made shell call!") 
-#    print()
     return 
 
 ###########################################################################
@@ -214,8 +191,6 @@ def svg_to_png(filename):
 # 
 ###########################################################################   
 def make_img_file(font, hhmmss, filename): 
-    #print("Making SVG") 
     make_svg_file(font, hhmmss, filename) 
-    #print("Making PNG") 
     svg_to_png(filename) 
     return 

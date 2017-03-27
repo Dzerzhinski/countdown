@@ -1,116 +1,67 @@
-from moviepy.editor import *
-from numpy import *
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Mar 25 13:25:44 2017
 
-import subprocess 
+@author: johns
+"""
+
+from moviepy.editor import * 
+from timerFont import *
+import timerDisplay as TD 
 
 SCREENSIZE = (1280, 720)
 HOURS = 1
 MIN_PER_HOUR = 60
-SEC_PER_MIN = 60
-TIME_FMT = '{:02d}:{:02d}:{:02d}' 
+SEC_PER_MIN = 60 
 
-FONTSIZE = 200
+FONTSIZE = 200  
 
-font_name = "monofur"
+SUBCLIP_INCR = 60
 
-hour = 1
+font_name = "Times New Roman"
+output_file = "countdown.mp4" 
+font_file = "c:\\Windows\\Fonts\\times.ttf" 
+
+hour = 0
 minute = 0
-second = 0
+second = 10 
 
-#clip_queue = []
-
-
-def find_font_file(font_name): 
-    shell_call_args = ["convert", "-list", "font"] 
-    shell_call = subprocess.Popen(shell_call_args, stdout = subprocess.PIPE) 
-    font_list, shell_err = shell_call.communicate() 
+def make_subclip(font, ttl_time, i_clip): 
+    img_queue = [] 
+    for j in range(SUBCLIP_INCR): 
+        if(j + (i_clip * SUBCLIP_INCR) > ttl_time): 
+            break 
+        time = (i_clip * SUBCLIP_INCR) + j 
+        time_display_str = TD.time_to_str(TD.get_time_left(ttl_time, time)) 
+        img_file_j = "./temp/temp_timer{}".format(j) 
+        TD.make_img_file(font, time_display_str, img_file_j)  
+        img_clip_j = ImageClip(img_file_j + ".png").set_position("center") 
+        img_clip_j = img_clip_j.set_start((j)) 
+        img_clip_j = img_clip_j.set_end((j + 1)) 
+        img_queue.append(img_clip_j) 
+    subclip = CompositeVideoClip(img_queue, bg_color = (0, 0, 0)) 
+    subclip_file = "./temp/subclip{}.mp4".format(i_clip) 
+    subclip.write_videofile(subclip_file, fps = 24) 
+    return subclip_file
     
-    fname_exp = r"^Font: " + font_name + r"$" 
-    fpath_exp = r"\bglyphs: (.*)$" 
+def make_file(font, ttl_time, outfile): 
+    subclip_queue = list() 
+    zero_flag = False 
+    i_subclip = 0 
+    while(not zero_flag): 
+        subclip = make_subclip(font, ttl_time, i_subclip) 
+        t_subclip = SUBCLIP_INCR * i_subclip
+        subclip_queue.append(VideoFileClip(subclip).set_start(t_subclip).set_position("center")) 
+        i_subclip += 1 
+        zero_flag = (i_subclip * SUBCLIP_INCR > ttl_time) 
+    countdown = CompositeVideoClip(subclip_queue, size = SCREENSIZE, \
+                    bg_color = (0, 0, 0)) 
+    countdown.write_videofile(outfile, fps = 24) 
     
-    fname_match = re.search(fname_exp) 
-    fpath_match = re.search(fpath_exp, fname_match.start) 
-    
-    return fpath_match.group(1) 
 
-ttl_time = ((hour * 60) + minute) * 60 + second
+font = TimerFont(font_name, font_file, FONTSIZE) 
+countdown_length = (hour * MIN_PER_HOUR) 
+countdown_length = SEC_PER_MIN * (minute + countdown_length) 
+countdown_length += second 
 
-#clip_15m = VideoFileClip("clips/Scene2.mov").set_start((10, 0))
-#clip_30m = VideoFileClip("clips/Scene3.mov").set_start((20, 0))
-#clip_45m = VideoFileClip("clips/Scene4.mov").set_start((30, 0))
-
-
-
-# def calc_start(h, m, s):
-#     minutes = (MINUTES - 1) - m
-#     seconds = 59 - s
-#     return (h, minutes, seconds)
-# 
-# def calc_end(h, m, s):
-#     seconds = 60 - s
-#     minutes = (MINUTES - 1) - m + (seconds // 60)
-#     seconds = seconds % 60
-#     return (h, minutes, seconds)
-
-def prnt_time_left(current_time):
-    time = ttl_time - current_time
-    s = time % 60
-    time = time // 60
-    m = time % 60
-    time = time // 60
-    h = time
-    return TIME_FMT.format(h, m, s)
-
-file_queue = []
-n = 0
-flag = False
-while (not flag):
-    clip_queue = []
-    for i in range(60):
-        if(((n * 60) + i) > ttl_time): 
-            break
-        time = prnt_time_left((60 * n) + i)
-        clip = TextClip(time, font = font_name, color = 'white', \
-                fontsize = FONTSIZE).set_pos('center')
-        clip = clip.set_start(i)
-        clip = clip.set_end(i + 1)
-        clip_queue.append(clip)
-    subfile = CompositeVideoClip(clip_queue, size = SCREENSIZE, bg_color = (0, 0, 0))
-    subfile.write_videofile("countdown_subfile{number}.mp4".format(number = n), fps = 24, threads = 1)
-    file_queue.append(VideoFileClip("countdown_subfile{number}.mp4".format(number = n)).set_start((n, 0)))
-    clip_queue = []
-    subfile = None
-    n += 1
-    if(n * 60 > ttl_time):
-        flag = True
-
-end_clip = TextClip("00:00:00", \
-        font = font_name, color = 'white', \
-        fontsize = FONTSIZE).set_pos('center')
-end_clip = end_clip.set_start(ttl_time)
-end_clip = end_clip.set_duration(60)
-file_queue.append(end_clip)
-
-# for i in reversed(range(0, hour)):
-#     for j in reversed(range(MINUTES)):
-#         for k in reversed(range(SECONDS)):
-#             time = TIME_FMT.format(i, j, k)
-#             clip = TextClip(time, font = 'Eraser', color = 'white', \
-#                     fontsize = 100).set_pos('center')
-#             clip = clip.set_start(calc_start(i, j, k))
-#             clip = clip.set_end(calc_end(i, j, k))
-#             clip_queue.append(clip)
-
-#bg = ColorClip(SCREENSIZE).set_duration(ttl_time + 60)
-#file_queue.insert(0, bg)
-# countdown = concatenate_videoclips(clip_queue).set_pos('center')
-
-#clip_queue.append(clip_15m)
-#clip_queue.append(clip_30m)
-#clip_queue.append(clip_45m)
-
-countdown_final = CompositeVideoClip(file_queue, size = SCREENSIZE, bg_color = (0, 0, 0))
-countdown_final.write_videofile('countdown.seance.mono.mp4', fps = 24, threads = 4)
-
-
-
+make_file(font, countdown_length, output_file) 

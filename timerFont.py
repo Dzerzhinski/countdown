@@ -16,7 +16,6 @@ class TimerFont:
     
     def __init__(self, font_name, font_file_path, p_size): 
         self.name = font_name
-        # self.fpath = self._findFontFile(font_name)
         self.font = TTLib.TTFont(font_file_path) 
         
         self.pt_size = p_size
@@ -56,8 +55,6 @@ class TimerFont:
         shell_call_args = ["magick", "-list", "font"] 
         shell_call = subprocess.Popen(shell_call_args, stdout = subprocess.PIPE) 
         font_list = shell_call.communicate()[0].decode(encoding = 'ascii')
-        # print(font_list) 
-        # print(type(font_list))     
             
         fname_exp = re.compile(r"^\s*Font: " + font_name + r".?$", re.M)
         fpath_exp = re.compile(r"^\s*glyphs: ([^\r]*)\r$", re.M)

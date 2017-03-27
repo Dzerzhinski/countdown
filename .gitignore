@@ -1,0 +1,5 @@
+/temp/** 
+*.mp4 
+*.png 
+*.svg 
+__pycache__/

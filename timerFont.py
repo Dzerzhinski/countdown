@@ -46,7 +46,8 @@ class TimerFont:
         
         self.adv_dig = self._findMaxAdvance(glyf_list, self.font) 
         self.adv_dig = (int(math.ceil(self.scale * self.adv_dig)))
-        glyf_list = None 
+        del glyf_list 
+        
         
         
     
@@ -116,7 +117,7 @@ class TimerFont:
             code_pts = t.cmap.keys() 
             for i in range(10): 
                 if ord(str(i)) in code_pts: 
-                    glyf_set.add(t[ord(str(i))]) 
+                    glyf_set.add(t.cmap[ord(str(i))]) 
         return list(glyf_set)  
 
     def _findMaxAdvance(self, glyf_list, font): 

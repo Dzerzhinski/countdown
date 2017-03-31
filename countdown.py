@@ -35,14 +35,14 @@ def make_subclip(font, ttl_time, i_clip, name_dir):
             break 
         time = (i_clip * SUBCLIP_INCR) + j 
         time_display_str = TD.time_to_str(TD.get_time_left(ttl_time, time)) 
-        img_file_j = name_dir + "temp_timer{}".format(j) 
+        img_file_j = name_dir + "/temp_timer{}".format(j) 
         TD.make_img_file(font, time_display_str, img_file_j)  
         img_clip_j = ImageClip(img_file_j + ".png").set_position("center") 
         img_clip_j = img_clip_j.set_start((j)) 
         img_clip_j = img_clip_j.set_end((j + 1)) 
         img_queue.append(img_clip_j) 
     subclip = CompositeVideoClip(img_queue, bg_color = (0, 0, 0)) 
-    subclip_file = name_dir + "subclip{}.mp4".format(i_clip) 
+    subclip_file = name_dir + "/subclip{}.mp4".format(i_clip) 
     subclip.write_videofile(subclip_file, fps = 24) 
     return subclip_file
     
@@ -51,6 +51,7 @@ def make_file(font, ttl_time, outfile):
     zero_flag = False 
     i_subclip = 0 
     with tempfile.TemporaryDirectory() as d_temp: 
+        print(d_temp)
         while(not zero_flag): 
             subclip = make_subclip(font, ttl_time, i_subclip, d_temp) 
             t_subclip = SUBCLIP_INCR * i_subclip
